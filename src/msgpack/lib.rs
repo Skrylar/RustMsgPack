@@ -4,5 +4,5 @@
 #[crate_type="rlib"];
 #[crate_id="msgpack"];
 
-pub mod magic;
+mod magic;
 pub mod writer;

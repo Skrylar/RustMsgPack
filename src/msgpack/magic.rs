@@ -1,4 +1,6 @@
 
+#[doc(hidden)];
+
 /*
     Magic numbers and statics go here.
  */
