@@ -249,6 +249,11 @@ pub trait Encodable {
 /// written, and will ensure both a minimal and correct amount of data is
 /// output to the stream.
 impl<'a> MsgPackWriter<'a> {
+	/// Writes an `Encodable` type to the underlying stream.
+	#[inline]
+	pub fn write<T: Encodable>(&mut self, t: &T) {
+		t.encode(self)
+	}
 
 	/// Writes a signed integer to the stream, using the least number of bytes
 	/// possible. Note that if the provided value is zero or greater, it will
