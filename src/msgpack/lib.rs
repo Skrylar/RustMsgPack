@@ -5,4 +5,4 @@
 #[crate_id="msgpack"];
 
 pub mod magic;
-pub mod rawencode;
+pub mod writer;
