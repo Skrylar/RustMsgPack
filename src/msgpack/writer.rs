@@ -26,8 +26,8 @@ impl<'a> MsgPackWriter<'a> {
 /* This is all low-level stuff; don't touch it */
 impl<'a> MsgPackWriter<'a> {
 	#[inline]
-	fn write_tag(&mut self, tag: EncodedType) {
-		self.writer.write_u8(tag as u8)
+	fn write_tag(&mut self, tag: u8) {
+		self.writer.write_u8(tag)
 	}
 
 	#[inline]
@@ -37,13 +37,13 @@ impl<'a> MsgPackWriter<'a> {
 
 	#[inline]
 	fn write_array16(&mut self, element_count: u16) {
-		self.write_tag(Array16);
+		self.write_tag(encoded_type::Array16);
 		self.writer.write_be_u16(element_count)
 	}
 
 	#[inline]
 	fn write_array32(&mut self, element_count: u32) {
-		self.write_tag(Array32);
+		self.write_tag(encoded_type::Array32);
 		self.writer.write_be_u32(element_count);
 	}
 
@@ -54,13 +54,13 @@ impl<'a> MsgPackWriter<'a> {
 
 	#[inline]
 	fn write_map16(&mut self, element_count: u16) {
-		self.write_tag(Map16);
+		self.write_tag(encoded_type::Map16);
 		self.writer.write_be_u16(element_count)
 	}
 
 	#[inline]
 	fn write_map32(&mut self, element_count: u32) {
-		self.write_tag(Map32);
+		self.write_tag(encoded_type::Map32);
 		self.writer.write_be_u32(element_count);
 	}
 
@@ -82,87 +82,87 @@ impl<'a> MsgPackWriter<'a> {
 
 	fn write_str8(&mut self, data: &str) {
 		if data.len() > 0xFF { fail!(ErrWontFit); }
-		self.write_tag(Str8);
+		self.write_tag(encoded_type::Str8);
 		self.writer.write_u8(data.len() as u8);
 		self.writer.write(data.as_bytes())
 	}
 
 	fn write_str16(&mut self, data: &str) {
 		if data.len() > 0xFFFF { fail!(ErrWontFit); }
-		self.write_tag(Str16);
+		self.write_tag(encoded_type::Str16);
 		self.writer.write_be_u16(data.len() as u16);
 		self.writer.write(data.as_bytes())
 	}
 
 	fn write_str32(&mut self, data: &str) {
 		if data.len() > 0xFFFFFFFF { fail!(ErrWontFit); }
-		self.write_tag(Str32);
+		self.write_tag(encoded_type::Str32);
 		self.writer.write_be_u32(data.len() as u32);
 		self.writer.write(data.as_bytes())
 	}
 
 	fn write_ext8(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Ext8);
+		self.write_tag(encoded_type::Ext8);
 		self.writer.write_i8(user_type);
 		self.writer.write_u8(data.len() as u8);
 	}
 
 	fn write_ext16(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Ext16);
+		self.write_tag(encoded_type::Ext16);
 		self.writer.write_i8(user_type);
 		self.writer.write_be_u16(data.len() as u16);
 	}
 
 	fn write_ext32(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Ext32);
+		self.write_tag(encoded_type::Ext32);
 		self.writer.write_i8(user_type);
 		self.writer.write_be_u32(data.len() as u32);
 	}
 
 	fn write_fixext1(&mut self, user_type: i8, data: u8) {
-		self.write_tag(Fixext1);
+		self.write_tag(encoded_type::Fixext1);
 		self.writer.write_i8(user_type);
 		self.writer.write_u8(data);
 	}
 
 	fn write_fixext2(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Fixext2);
+		self.write_tag(encoded_type::Fixext2);
 		self.writer.write_i8(user_type);
 		self.writer.write(data.slice_to(2))
 	}
 
 	fn write_fixext4(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Fixext4);
+		self.write_tag(encoded_type::Fixext4);
 		self.writer.write_i8(user_type);
 		self.writer.write(data.slice_to(4))
 	}
 
 	fn write_fixext8(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Fixext8);
+		self.write_tag(encoded_type::Fixext8);
 		self.writer.write_i8(user_type);
 		self.writer.write(data.slice_to(8))
 	}
 
 	fn write_fixext16(&mut self, user_type: i8, data: &[u8]) {
-		self.write_tag(Fixext16);
+		self.write_tag(encoded_type::Fixext16);
 		self.writer.write_i8(user_type);
 		self.writer.write(data.slice_to(16))
 	}
 
 	fn write_bin8(&mut self, data: &[u8]) {
-		self.write_tag(Bin8);
+		self.write_tag(encoded_type::Bin8);
 		self.writer.write_u8(data.len() as u8);
 		self.writer.write(data)
 	}
 
 	fn write_bin16(&mut self, data: &[u8]) {
-		self.write_tag(Bin16);
+		self.write_tag(encoded_type::Bin16);
 		self.writer.write_be_u16(data.len() as u16);
 		self.writer.write(data)
 	}
 
 	fn write_bin32(&mut self, data: &[u8]) {
-		self.write_tag(Bin32);
+		self.write_tag(encoded_type::Bin32);
 		self.writer.write_be_u32(data.len() as u32);
 		self.writer.write(data)
 	}
@@ -173,64 +173,64 @@ impl<'a> MsgPackWriter<'a> {
 impl<'a> MsgPackWriter<'a> {
  	#[inline]
 	fn write_nil(&mut self) {
-		self.write_tag(Nil)
+		self.write_tag(encoded_type::Nil)
 	}
 
 	#[inline]
 	fn write_false(&mut self) {
-		self.write_tag(False)
+		self.write_tag(encoded_type::False)
 	}
 
 	#[inline]
 	fn write_true(&mut self) {
-		self.write_tag(True)
+		self.write_tag(encoded_type::True)
 	}
 
 	#[inline]
 	fn write_i8(&mut self, t: i8) {
-		self.write_tag(Int8);
+		self.write_tag(encoded_type::Int8);
 		self.writer.write_i8(t)
 	}
 
 	#[inline]
 	fn write_u8(&mut self, t: u8) {
-		self.write_tag(Uint8);
+		self.write_tag(encoded_type::Uint8);
 		self.writer.write_u8(t)
 	}
 
 	#[inline]
 	fn write_i16(&mut self, t: i16) {
-		self.write_tag(Int16);
+		self.write_tag(encoded_type::Int16);
 		self.writer.write_be_i16(t)
 	}
 
 	#[inline]
 	fn write_u16(&mut self, t: u16) {
-		self.write_tag(Uint16);
+		self.write_tag(encoded_type::Uint16);
 		self.writer.write_be_u16(t)
 	}
 
 	#[inline]
 	fn write_i32(&mut self, t: i32) {
-		self.write_tag(Int32);
+		self.write_tag(encoded_type::Int32);
 		self.writer.write_be_i32(t)
 	}
 
 	#[inline]
 	fn write_u32(&mut self, t: u32) {
-		self.write_tag(Uint32);
+		self.write_tag(encoded_type::Uint32);
 		self.writer.write_be_u32(t)
 	}
 
 	#[inline]
 	fn write_i64(&mut self, t: i64) {
-		self.write_tag(Int64);
+		self.write_tag(encoded_type::Int64);
 		self.writer.write_be_i64(t)
 	}
 
 	#[inline]
 	fn write_u64(&mut self, t: u64) {
-		self.write_tag(Uint64);
+		self.write_tag(encoded_type::Uint64);
 		self.writer.write_be_u64(t)
 	}
 }
@@ -290,13 +290,13 @@ impl<'a> MsgPackWriter<'a> {
 
 	/// Writes a 32-bit floating point value to the stream.
 	pub fn write_f32(&mut self, t: f32) {
-		self.write_tag(Float32);
+		self.write_tag(encoded_type::Float32);
 		self.writer.write_be_f32(t);
 	}
 
 	/// Writes a 64-bit floating point value to the stream.
 	pub fn write_f64(&mut self, t: f64) {
-		self.write_tag(Float64);
+		self.write_tag(encoded_type::Float64);
 		self.writer.write_be_f64(t)
 	}
 
