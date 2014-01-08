@@ -1,0 +1,17 @@
+= RustMsgPack Readme
+:author: Skrylar
+
+This library is a Rust-native implementation of the http://msgpack.org/[MsgPack] data serialization format. It aims to provide an elegant, layered and easy to use API.
+
+My implementation supports http://wiki.msgpack.org/display/MSGPACK/Format+specification[everything in the MsgPack specification] including type-extension fields for custom data types. Using the provided `MsgPackReader` and `MsgPackWriter` structures, you can read and write any arbitrary stream of MsgPack values. When using the reader, a custom enum is provided to interpret the data 'exactly as read from the stream' and the writer will use the most efficient means of packing your data for compactness.
+
+== Todo
+
+ - Complete round-trip unit tests.
+ - Trait implementations for Rust's standard library types.
+ - Assemble benchmarks of the encoding/decoding process, and compare them to `msgpack-c`.
+ - Interoperability tests with messages encoded in other implementations.
+ - Make sure everything is properly tagged and documented.
+ - Support `Map` types (and Rust's `HashTable` equivalent.) footnote:[I didn't write this because I don't know much about the `HashTable` type.]
+ - Zero-copy reader. footnote:[msgpack-c has this; it allows reading strings and binary buffers from a byte buffer we already have, which reduces memory I/O for short-lived information such as command strings.]
+ - Support for Rust's built-in serialization traits.
