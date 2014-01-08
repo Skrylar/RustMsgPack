@@ -71,7 +71,7 @@ impl<'a> MsgPackWriter<'a> {
 
 	fn write_fix_neg(&mut self, t: i8) {
 		let x : u8 = unsafe { cast::transmute(t) };
-		self.writer.write_u8(0xE0 | (x & 0x1F))
+		self.writer.write_u8(x)
 	}
 
 	fn write_str_fix(&mut self, data: &str) {
@@ -81,21 +81,18 @@ impl<'a> MsgPackWriter<'a> {
 	}
 
 	fn write_str8(&mut self, data: &str) {
-		if data.len() > 0xFF { fail!(ErrWontFit); }
 		self.write_tag(encoded_type::Str8);
 		self.writer.write_u8(data.len() as u8);
 		self.writer.write(data.as_bytes())
 	}
 
 	fn write_str16(&mut self, data: &str) {
-		if data.len() > 0xFFFF { fail!(ErrWontFit); }
 		self.write_tag(encoded_type::Str16);
 		self.writer.write_be_u16(data.len() as u16);
 		self.writer.write(data.as_bytes())
 	}
 
 	fn write_str32(&mut self, data: &str) {
-		if data.len() > 0xFFFFFFFF { fail!(ErrWontFit); }
 		self.write_tag(encoded_type::Str32);
 		self.writer.write_be_u32(data.len() as u32);
 		self.writer.write(data.as_bytes())
@@ -264,12 +261,14 @@ impl<'a> MsgPackWriter<'a> {
 		if (t >= 0) {
 			self.write_uint(t as u64)
 		} else {
+			// Negative value, so now we need to find which type we can cram
+			// this in.
 			match t {
 				x if x >= -15 => self.write_fix_neg(t as i8),
 				x if x >= -127 => self.write_i8(t as i8),
 				x if x >= -32767 => self.write_i16(t as i16),
 				x if x >= -2147483647 => self.write_i32(t as i32),
-				x if x >= -9223372034707292159 => self.write_i64(t as i64),
+				x if x >= -9223372036854775808 => self.write_i64(t as i64),
 				_ => { fail!(ErrWontFit) }
 			}
 		}
@@ -279,12 +278,11 @@ impl<'a> MsgPackWriter<'a> {
 	/// bytes possible.
 	pub fn write_uint(&mut self, t: u64) {
 		match t {
-			x if x <= 2^7 => self.write_fix_num(t as u8),
-			x if x <= 2^8 => self.write_u8(t as u8),
-			x if x <= 2^16 => self.write_u16(t as u16),
-			x if x <= 2^32 => self.write_u32(t as u32),
-			x if x <= 2^64 => self.write_u64(t as u64),
-			_ => { fail!(ErrWontFit) }
+			x if x < 128 => self.write_fix_num(t as u8),
+			x if x < 256 => self.write_u8(t as u8),
+			x if x < 65536 => self.write_u16(t as u16),
+			x if x < 4294967296 => self.write_u32(t as u32),
+			_ => self.write_u64(t as u64)
 		}
 	}
 
@@ -317,9 +315,9 @@ impl<'a> MsgPackWriter<'a> {
 		let x = t.len();
 		match x {
 			x if x <= 31 => self.write_str_fix(t),
-			x if x <= (2^8)-1 => self.write_str8(t),
-			x if x <= (2^16)-1 => self.write_str16(t),
-			x if x <= (2^32)-1 => self.write_str32(t),
+			x if x <= 255 => self.write_str8(t),
+			x if x <= 65535 => self.write_str16(t),
+			x if x <= 4294967295 => self.write_str32(t),
 			_ => { fail!(ErrWontFit) }
 		}
 	}
@@ -330,9 +328,9 @@ impl<'a> MsgPackWriter<'a> {
 	pub fn write_bin(&mut self, t: &[u8]) {
 		let x = t.len();
 		match x {
-			x if x <= (2^8)-1 => self.write_bin8(t),
-			x if x <= (2^16)-1 => self.write_bin16(t),
-			x if x <= (2^32)-1 => self.write_bin32(t),
+			x if x <= 255 => self.write_bin8(t),
+			x if x <= 65535 => self.write_bin16(t),
+			x if x <= 4294967295 => self.write_bin32(t),
 			_ => { fail!(ErrWontFit) }
 		}
 	}
@@ -353,9 +351,9 @@ impl<'a> MsgPackWriter<'a> {
  			x if x == 4 => self.write_fixext4(type_code, t),
  			x if x == 8 => self.write_fixext8(type_code, t),
  			x if x == 16 => self.write_fixext16(type_code, t),
-			x if x <= (2^8)-1 => self.write_ext8(type_code, t),
-			x if x <= (2^16)-1 => self.write_ext16(type_code, t),
-			x if x <= (2^32)-1 => self.write_ext32(type_code, t),
+			x if x <= 255 => self.write_ext8(type_code, t),
+			x if x <= 65535 => self.write_ext16(type_code, t),
+			x if x <= 4294967295 => self.write_ext32(type_code, t),
 			_ => { fail!(ErrWontFit) }
 		}
 	}
@@ -365,8 +363,8 @@ impl<'a> MsgPackWriter<'a> {
 		let x = t.len();
 		match x {
 			y if y <= 16 => self.write_array8(x as u8),
-			y if y <= 2^16 => self.write_array16(x as u16),
-			y if y <= 2^32 => self.write_array32(x as u32),
+			y if y <= 65535 => self.write_array16(x as u16),
+			y if y <= 4294967295 => self.write_array32(x as u32),
 			_ => { fail!(ErrWontFit) }
 		}
 		for z in t.iter() {
