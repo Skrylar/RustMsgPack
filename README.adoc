@@ -17,3 +17,33 @@ in the MsgPack v5 specification proposal]. Using the provided `MsgPackReader` an
  - Support `Map` types (and Rust's `HashTable` equivalent.) footnote:[I didn't write this because I don't know much about the `HashTable` type.]
  - Zero-copy reader. footnote:[msgpack-c has this; it allows reading strings and binary buffers from a byte buffer we already have, which reduces memory I/O for short-lived information such as command strings.]
  - Support for Rust's built-in serialization traits.
+
+== License
+
+RustMsgPack is provided under the 'zlib' license:
+
+Copyright (c) 2014 Joshua A. Cearley
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+
+   2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+
+   3. This notice may not be removed or altered from any source
+   distribution.
+
+== Notes
+
+`doc/spec.md` is not covered under the above license.
+
