@@ -1,9 +1,11 @@
 = RustMsgPack Readme
 :author: Skrylar
 
-This library is a Rust-native implementation of Version 5 for the http://msgpack.org/[MsgPack] data serialization format. It aims to provide an elegant, layered and easy to use API.
+RustMsgPack is a Rust-native implementation of for the http://msgpack.org/[MsgPack] data serialization format. It aims to provide an elegant, layered and easy to use API.
 
-My implementation supports http://wiki.msgpack.org/display/MSGPACK/Format+specification[everything in the MsgPack specification] including type-extension fields for custom data types. Using the provided `MsgPackReader` and `MsgPackWriter` structures, you can read and write any arbitrary stream of MsgPack values. When using the reader, a custom enum is provided to interpret the data 'exactly as read from the stream' and the writer will use the most efficient means of packing your data for compactness.
+My implementation supports
+https://github.com/msgpack/msgpack/blob/8b3c890a33aa0d235c62d01d4c9fafc6df984d9e/spec.md[everything
+in the MsgPack v5 specification proposal]. Using the provided `MsgPackReader` and `MsgPackWriter` structures, you can read and write any arbitrary stream of MsgPack values. When using the reader, a custom enum is provided to interpret the data 'exactly as read from the stream' and the writer will use the most efficient means of packing your data for compactness.
 
 == Todo
 
