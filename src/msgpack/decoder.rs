@@ -31,12 +31,12 @@ use std::vec;
 static ErrNoData : &'static str = "No valid MsgPack type to read.";
 static ErrInsufficientData : &'static str = "Not enough bytes available to read value.";
 
-pub enum DecodedValue {
+pub enum Value {
 	Signed(i64),
 	Unsigned(u64),
 	String(~str),
 	Binary(~[u8]),
-	Array(~[DecodedValue]),
+	Array(~[Value]),
 	Float32(f32),
 	Float64(f64),
 	Extension(i8, ~[u8]),
@@ -45,18 +45,18 @@ pub enum DecodedValue {
 	Nil
 }
 
-pub struct MsgPackReader<'a> {
+pub struct Decoder<'a> {
 	priv reader: &'a mut io::Reader
 }
 
-impl<'a> MsgPackReader<'a> {
-	pub fn new(reader: &'a mut io::Reader) -> MsgPackReader {
-		MsgPackReader { reader: reader }
+impl<'a> Decoder<'a> {
+	pub fn new(reader: &'a mut io::Reader) -> Decoder {
+		Decoder { reader: reader }
 	}
 }
 
-impl<'a> MsgPackReader<'a> {
-	pub fn read(&mut self) -> DecodedValue {
+impl<'a> Decoder<'a> {
+	pub fn read(&mut self) -> Value {
 		let x = self.try_read();
 		match x {
 			Ok(y) => y,
@@ -65,9 +65,9 @@ impl<'a> MsgPackReader<'a> {
 	}
 
 	#[allow(experimental)]
-	fn read_array(&mut self, elements: uint) -> Result<DecodedValue, &'static str> {
+	fn read_array(&mut self, elements: uint) -> Result<Value, &'static str> {
 		/* reserve space for each value */
-		let mut accum : ~[DecodedValue] = vec::with_capacity(elements);
+		let mut accum : ~[Value] = vec::with_capacity(elements);
 		/* for each element we are to read */
 		let mut current = 0;
 		while (current < elements) {
@@ -82,7 +82,7 @@ impl<'a> MsgPackReader<'a> {
 		Ok(Array(accum))
 	}
 
-	fn read_str(&mut self, len: uint) -> Result<DecodedValue, &'static str> {
+	fn read_str(&mut self, len: uint) -> Result<Value, &'static str> {
 		let data = self.reader.read_bytes(len);
 		if data.len() == len {
 			Ok(String(str::from_utf8_owned(data)))
@@ -97,7 +97,7 @@ impl<'a> MsgPackReader<'a> {
 	/// desirable, and the reader may not support arbitrary seeking; so this
 	/// is left to the user who will know more about what they want.)
 	#[experimental] // experimental until the TODOs are fixed.
-	pub fn try_read(&mut self) -> Result<DecodedValue, &'static str> {
+	pub fn try_read(&mut self) -> Result<Value, &'static str> {
 		let tag = self.reader.read_u8();
 		match tag {
 			// fixed numbers (7-bit)

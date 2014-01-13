@@ -31,21 +31,21 @@ mod round_trip {
 	use std::io;
 	use std::io::mem;
 
-	use reader::*;
-	use writer::MsgPackWriter;
+	use decoder::*;
+	use encoder::Encoder;
 
-	fn test_harness(len: u64, encode: |&mut MsgPackWriter|, decode: |DecodedValue|) {
+	fn test_harness(len: u64, encode: |&mut Encoder|, decode: |Value|) {
 		let buffer : &mut [u8] = ~[0, .. 1024];
 		/* encoding cycle */ {
 			let mut writer = mem::BufWriter::new(buffer);
-			let mut packer = MsgPackWriter::new(&mut writer as &mut io::Writer);
+			let mut packer = Encoder::new(&mut writer as &mut io::Writer);
 			encode(&mut packer);
 			assert!(writer.tell() == len,
 				format!("Expected encoding of {} byte(s), got {} byte(s)", len, writer.tell()));
 		}
 		/* decoding cycle */ {
 			let mut reader = mem::BufReader::new(buffer);
-			let mut unpacker = MsgPackReader::new(&mut reader as &mut io::Reader);
+			let mut unpacker = Decoder::new(&mut reader as &mut io::Reader);
 			decode(unpacker.read());
 		}
 	}

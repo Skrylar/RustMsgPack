@@ -34,19 +34,19 @@ static ErrTypeReserved : &'static str = "Negative types are reserved for msgpack
 static ErrWontFit : &'static str = "Provided type is too large to be encoded in msgpack.";
 
 /// A utility which writes MsgPack-encoded data to an underlying `io::Writer`.
-pub struct MsgPackWriter<'a> {
+pub struct Encoder<'a> {
 	priv writer: &'a mut io::Writer
 }
 
 /* Put the constructor up here */
-impl<'a> MsgPackWriter<'a> {
-	pub fn new(dst: &'a mut io::Writer) -> MsgPackWriter {
-		MsgPackWriter { writer: dst }
+impl<'a> Encoder<'a> {
+	pub fn new(dst: &'a mut io::Writer) -> Encoder {
+		Encoder { writer: dst }
 	}
 }
 
 /* This is all low-level stuff; don't touch it */
-impl<'a> MsgPackWriter<'a> {
+impl<'a> Encoder<'a> {
 	#[inline]
 	fn write_tag(&mut self, tag: u8) {
 		self.writer.write_u8(tag)
@@ -189,7 +189,7 @@ impl<'a> MsgPackWriter<'a> {
 
 /* This is all the middle-level stuff; still don't touch. */
 
-impl<'a> MsgPackWriter<'a> {
+impl<'a> Encoder<'a> {
  	#[inline]
 	fn write_nil(&mut self) {
 		self.write_tag(encoded_type::Nil)
@@ -260,14 +260,14 @@ impl<'a> MsgPackWriter<'a> {
 /// will need to define this for themselves.
 pub trait Encodable {
 	/// Performs the necessary encoding on a given high layer encoding target.
-	fn encode (&self, destination: &mut MsgPackWriter);
+	fn encode (&self, destination: &mut Encoder);
 }
 
 /// Methods which write encoded data in to the stream. Writing functions will
 /// select the appropriate header tags to accomidate the amount of data being
 /// written, and will ensure both a minimal and correct amount of data is
 /// output to the stream.
-impl<'a> MsgPackWriter<'a> {
+impl<'a> Encoder<'a> {
 	/// Writes an `Encodable` type to the underlying stream.
 	#[inline]
 	pub fn write<T: Encodable>(&mut self, t: &T) {

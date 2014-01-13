@@ -28,5 +28,6 @@
 
 mod magic;
 mod testing;
-pub mod reader;
-pub mod writer;
+
+pub mod encoder;
+pub mod decoder;
